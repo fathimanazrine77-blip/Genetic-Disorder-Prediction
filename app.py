@@ -184,8 +184,6 @@ if st.button("🔍 Predict Genetic Disorder"):
         input_encoded = pd.get_dummies(input_df)
         input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
 
-        st.write("Input sent to model:", input_encoded)
-
         prediction = model.predict(input_encoded)[0]
         genetic_disorder_type = disorder_map.get(prediction, 'Unknown')
 

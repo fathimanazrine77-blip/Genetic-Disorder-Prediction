@@ -1,4 +1,3 @@
-
 #app.py code
 %%writefile app.py
 import streamlit as st
@@ -34,9 +33,10 @@ st.markdown("""
 def load_model():
     model = joblib.load('/content/genetic_disorder_model.pkl')
     columns = joblib.load('/content/model_columns.pkl')
-    return model, columns
+    scaler = joblib.load('/content/scaler.pkl')
+    return model, columns, scaler
 
-model, model_columns = load_model()
+model, model_columns, scaler = load_model()
 
 disorder_map = {
     'Leigh syndrome': 'Mitochondrial genetic inheritance disorders',
@@ -145,9 +145,22 @@ if st.button("🔍 Predict Genetic Disorder"):
         }
 
         input_df = pd.DataFrame([input_dict])
-        input_encoded = pd.get_dummies(input_df)
-        input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
-        prediction = model.predict(input_encoded)[0]
+
+        # Encode categorical columns using the same LabelEncoders from training
+        for col in input_df.select_dtypes(include='object').columns:
+            if col in label_encoders:
+                le = label_encoders[col]
+                val = input_df[col].astype(str).iloc[0]
+                # Handle unseen labels gracefully
+                if val in le.classes_:
+                    input_df[col] = le.transform([val])
+                else:
+                    input_df[col] = le.transform([le.classes_[0]])  # fallback
+
+        # Reindex to match exact training columns
+        input_df = input_df.reindex(columns=model_columns, fill_value=0)
+
+        prediction = model.predict(input_df)[0]
         genetic_disorder_type = disorder_map.get(prediction, 'Unknown')
 
         st.markdown(f"""

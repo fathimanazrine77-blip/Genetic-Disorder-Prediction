@@ -1,77 +1,41 @@
+#app.py code
 import streamlit as st
 import pandas as pd
 import joblib
 
-# Load model and columns
-@st.cache_resource
-def load_model():
-  model = joblib.load('/content/genetic_disorder_model.pkl')
-  columns = joblib.load('/content/model_columns.pkl')    
-  return model, columns
-# Page config
 st.set_page_config(page_title="Genetic Disorder Predictor", page_icon="🧬", layout="wide")
 
-# Custom CSS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap');
-   
-    html, body, [class*="css"] {
-        font-family: 'DM Sans', sans-serif;
-    }
-    h1, h2, h3 {
-        font-family: 'DM Serif Display', serif;
-    }
-    .main {
-        background-color: #f0f4f8;
-    }
+    html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+    h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+    .main { background-color: #f0f4f8; }
     .stButton>button {
-        background-color: #1a1a2e;
-        color: white;
-        border-radius: 8px;
-        padding: 0.6em 2em;
-        font-size: 16px;
-        border: none;
-        width: 100%;
+        background-color: #1a1a2e; color: white;
+        border-radius: 8px; padding: 0.6em 2em;
+        font-size: 16px; border: none; width: 100%;
     }
-    .stButton>button:hover {
-        background-color: #16213e;
-    }
+    .stButton>button:hover { background-color: #16213e; }
     .result-box {
-        background-color: #1a1a2e;
-        color: white;
-        padding: 2rem;
-        border-radius: 12px;
-        text-align: center;
-        margin-top: 1rem;
+        background-color: #1a1a2e; color: white;
+        padding: 2rem; border-radius: 12px;
+        text-align: center; margin-top: 1rem;
     }
-    .result-box h2 {
-        color: #00d4aa;
-        font-size: 1.2rem;
-        margin-bottom: 0.2rem;
-    }
-    .result-box h1 {
-        color: white;
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
-    }
-    .divider {
-        border-top: 1px solid #ffffff33;
-        margin: 1rem 0;
-    }
+    .result-box h2 { color: #00d4aa; font-size: 1.2rem; margin-bottom: 0.2rem; }
+    .result-box h1 { color: white; font-size: 1.8rem; margin-bottom: 1rem; }
+    .divider { border-top: 1px solid #ffffff33; margin: 1rem 0; }
     </style>
 """, unsafe_allow_html=True)
 
-# Load model and columns
 @st.cache_resource
 def load_model():
-    model = joblib.load('genetic_disorder_model.pkl')
-    columns = joblib.load('model_columns.pkl')
+    model = joblib.load('/content/genetic_disorder_model.pkl')
+    columns = joblib.load('/content/model_columns.pkl')
     return model, columns
 
 model, model_columns = load_model()
 
-# Disorder mapping
 disorder_map = {
     'Leigh syndrome': 'Mitochondrial genetic inheritance disorders',
     'Mitochondrial myopathy': 'Mitochondrial genetic inheritance disorders',
@@ -82,12 +46,10 @@ disorder_map = {
     'Diabetes': 'Multifactorial genetic inheritance disorders'
 }
 
-# Header
 st.markdown("<h1 style='text-align:center;'>🧬 Genetic Disorder Predictor</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center; color:gray;'>Enter patient details below to predict the genetic disorder subclass</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Input form
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -183,13 +145,12 @@ if st.button("🔍 Predict Genetic Disorder"):
         input_df = pd.DataFrame([input_dict])
         input_encoded = pd.get_dummies(input_df)
         input_encoded = input_encoded.reindex(columns=model_columns, fill_value=0)
-
         prediction = model.predict(input_encoded)[0]
         genetic_disorder_type = disorder_map.get(prediction, 'Unknown')
 
         st.markdown(f"""
             <div class="result-box">
-                <h2>🧬 Genetic Disorder Type</h2>
+                <h2>🧬 Genetic Disorder</h2>
                 <h1>{genetic_disorder_type}</h1>
                 <div class="divider"></div>
                 <h2>🔬 Disorder Subclass</h2>
